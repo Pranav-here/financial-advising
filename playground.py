@@ -11,8 +11,8 @@ from phi.playground import Playground, serve_playground_app
 
 financial_agent = Agent(
     name="Financial Analyst",
-    model=Groq(id="llama-3.3-70b-versatile"),
-    # model=OpenAIChat(id="gpt-4o-mini"),
+    # model=Groq(id="llama-3.3-70b-versatile"),
+    model=OpenAIChat(id="gpt-4o-mini"),
         tools=[
         YFinanceTools(
             stock_price=True,
@@ -29,8 +29,8 @@ financial_agent = Agent(
 
 web_researcher = Agent(
     name="Web Researcher",
-    model=Groq(id="llama-3.3-70b-versatile"),
-    # model=OpenAIChat(id="gpt-4o-mini"),
+    # model=Groq(id="llama-3.3-70b-versatile"),
+    model=OpenAIChat(id="gpt-4o-mini"),
         tools=[DuckDuckGo()],
     show_tool_calls=True,
     markdown=True,
@@ -41,8 +41,8 @@ web_researcher = Agent(
 
 agents_team = Agent(
     team=[financial_agent, web_researcher],
-    model=Groq(id="llama-3.3-70b-versatile"),
-    # model=OpenAIChat(id="gpt-4o-mini"),
+    # model=Groq(id="llama-3.3-70b-versatile"),
+    model=OpenAIChat(id="gpt-4o-mini"),
     show_tool_calls=True,
     markdown=True,
     instructions=["Always include sources of the information that you gather.", "Always include sources of the information that you gather."],
