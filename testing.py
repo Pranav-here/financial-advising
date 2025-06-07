@@ -14,6 +14,13 @@ from phi.model.openai import OpenAIChat
 # This piece lets the model resolve informal or human terms to stock symbols
 # Example: "Pranav" → "AAPL", so you can customize aliasing or internal logic
 def get_company_symbol(company: str) -> str:
+    """
+    Use this function to get the symbol of a company
+    Args:
+        company(str): The name of the company
+    Returns:
+        str: The symbol for the company
+    """
     symbols={
         "Pranav": "AAPL",     # maps 'Pranav' to Apple stock
         "Tesla": "TSLA",      # Tesla remains Tesla
@@ -66,4 +73,4 @@ test_agent = Agent(
 
 # Ask the agent to compare Apple (Pranav) and Tesla based on analyst recommendations
 # With our symbol-mapping tool, it should resolve "Pranav" to "AAPL", then run yfinance queries on AAPL and TSLA
-test_agent.print_response("Summarize and compare the analyst recommendations for the stocks of Pranav and Tesla?")
+test_agent.print_response("Summarize and compare the analyst recommendations for the stocks of Pranav and Tesla")
