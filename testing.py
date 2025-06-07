@@ -1,5 +1,5 @@
 # Load environment variables from .env file
-# This is where your GROQ_API_KEY should be stored
+# This is where your GROQ_API_KEY and OPENAI_API_KEY should be stored
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -8,6 +8,18 @@ load_dotenv()
 from phi.agent import Agent
 from phi.model.groq import Groq
 from phi.tools.yfinance import YFinanceTools
+from phi.model.openai import OpenAIChat
+
+# This is to show flexibility that we can also do this with our code
+# This peice with redirect apple's stocks to Pranav
+def get_company_symbol(company: str) -> str:
+    symbols={
+        "Pranav": "AAPL",
+        "Tesla": "TSLA",
+        "Google": "GOOGL"
+    }
+    return symbols.get(company, "Unknown")
+
 
 # Set up the agent using Groq's LLaMA model
 # We're using 'llama-3.3-70b-versatile' here, which is a strong general-purpose model: works well for reasoning, Q&A, and basic analysis.
@@ -21,9 +33,11 @@ from phi.tools.yfinance import YFinanceTools
 # - It’s widely supported, stable, and known to handle reasoning + finance prompts well.
 # - We're just starting to build this system, so stability + flexibility > raw performance for now.
 test_agent = Agent(
-    model=Groq(
-        id="llama-3.3-70b-versatile"
-    ),
+    model=Groq(        id="llama-3.3-70b-versatile"    ),
+    # model=OpenAIChat(
+    #     id="gpt-4o-mini"
+    # ),
+
     
     # Attach financial tools powered by yfinance
     # These allow the agent to actually pull real stock info like price, fundamentals, and analyst opinions
@@ -32,7 +46,7 @@ test_agent = Agent(
             stock_price=True,                   # Enables current stock price access
             analyst_recommendations=True,       # Enables analyst buy/sell/hold data
             stock_fundamentals=True             # Enables P/E, EPS, market cap, etc.
-        )
+        ),get_company_symbol
     ],
 
     show_tool_calls=True,   # Shows which tools are being used behind the scenes (you’ll see what it's fetching from yfinance)
@@ -40,11 +54,11 @@ test_agent = Agent(
     
     # Add behavior instructions to guide how the model replies
     # In this case, it will always use tables when comparing stuff
-    instructions=["Always create tables for comparisons"],
+    instructions=["Always create tables for comparisons. Always get symbols from the get_company_symbol too andonly use that symbol for further analysis, if the symbol does not exist abort"],
     
     debug_mode=True         # Full transparency mode — logs every action the agent takes (tool calls, reasoning, etc.)
 )
 
 # Ask the agent to compare Apple and Tesla based on analyst recommendations
 # With the above setup, it should fetch data live using yfinance, then show a table comparing the two
-test_agent.print_response("Summarize and compare the analyst recommendations for the stocks of Apple and Tesla?")
+test_agent.print_response("Summarize and compare the analyst recommendations for the stocks of Pranav and Tesla?")
