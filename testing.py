@@ -11,15 +11,15 @@ from phi.tools.yfinance import YFinanceTools
 from phi.model.openai import OpenAIChat
 
 # This is to show flexibility that we can also do this with our code
-# This peice with redirect apple's stocks to Pranav
+# This piece lets the model resolve informal or human terms to stock symbols
+# Example: "Pranav" → "AAPL", so you can customize aliasing or internal logic
 def get_company_symbol(company: str) -> str:
     symbols={
-        "Pranav": "AAPL",
-        "Tesla": "TSLA",
-        "Google": "GOOGL"
+        "Pranav": "AAPL",     # maps 'Pranav' to Apple stock
+        "Tesla": "TSLA",      # Tesla remains Tesla
+        "Google": "GOOGL"     # Maps to Alphabet
     }
-    return symbols.get(company, "Unknown")
-
+    return symbols.get(company, "Unknown")  # Fallback is "Unknown" (agent is told to abort if this happens)
 
 # Set up the agent using Groq's LLaMA model
 # We're using 'llama-3.3-70b-versatile' here, which is a strong general-purpose model: works well for reasoning, Q&A, and basic analysis.
@@ -34,11 +34,12 @@ def get_company_symbol(company: str) -> str:
 # - We're just starting to build this system, so stability + flexibility > raw performance for now.
 test_agent = Agent(
     model=Groq(        id="llama-3.3-70b-versatile"    ),
+    
+    # Optionally switch to OpenAI GPT-4o-mini for comparison/testing
     # model=OpenAIChat(
     #     id="gpt-4o-mini"
     # ),
 
-    
     # Attach financial tools powered by yfinance
     # These allow the agent to actually pull real stock info like price, fundamentals, and analyst opinions
     tools=[
@@ -46,19 +47,23 @@ test_agent = Agent(
             stock_price=True,                   # Enables current stock price access
             analyst_recommendations=True,       # Enables analyst buy/sell/hold data
             stock_fundamentals=True             # Enables P/E, EPS, market cap, etc.
-        ),get_company_symbol
+        ),
+        get_company_symbol                      # Adds our custom symbol resolver as a callable tool
     ],
 
-    show_tool_calls=True,   # Shows which tools are being used behind the scenes (you’ll see what it's fetching from yfinance)
-    markdown=True,          # Formats response output using markdown (tables, bold, etc. where needed)
+    show_tool_calls=True,   # Logs each time a tool is used, helpful to see which functions were triggered
+    markdown=True,          # Enables clean formatting like tables and bold text in answers
+
+    # Custom behavior instructions for the model
+    # It must always create tables for comparison-type answers
+    # And must fetch stock symbols only via our get_company_symbol function — if it can't find the symbol, it should abort
+    instructions=[
+        "Always create tables for comparisons. Always get symbols from the get_company_symbol too and only use that symbol for further analysis, if the symbol does not exist abort"
+    ],
     
-    # Add behavior instructions to guide how the model replies
-    # In this case, it will always use tables when comparing stuff
-    instructions=["Always create tables for comparisons. Always get symbols from the get_company_symbol too andonly use that symbol for further analysis, if the symbol does not exist abort"],
-    
-    debug_mode=True         # Full transparency mode — logs every action the agent takes (tool calls, reasoning, etc.)
+    debug_mode=True         # Turns on full logging of how the agent thinks, makes decisions, and picks tools — very useful for dev/debug
 )
 
-# Ask the agent to compare Apple and Tesla based on analyst recommendations
-# With the above setup, it should fetch data live using yfinance, then show a table comparing the two
+# Ask the agent to compare Apple (Pranav) and Tesla based on analyst recommendations
+# With our symbol-mapping tool, it should resolve "Pranav" to "AAPL", then run yfinance queries on AAPL and TSLA
 test_agent.print_response("Summarize and compare the analyst recommendations for the stocks of Pranav and Tesla?")
