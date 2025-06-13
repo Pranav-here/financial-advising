@@ -62,4 +62,4 @@ app = Playground(agents=[financial_agent, web_researcher]).get_app()
 if __name__=="__main__":
     serve_playground_app("playground:app", reload=True)     # Runs the playground with live reload enabled
 
-# Use `phi euth` to start the environment, then run this script to launch the playground
+# Use `phi auth` to start the environment, then run this script to launch the playground
